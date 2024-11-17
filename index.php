@@ -20,6 +20,12 @@ include 'config.php';
         <input type="url" id="link" name="link" required>
         <label for="image">Image:</label>
         <input type="file" id="image" name="image">
+        <label for="category">Category:</label>
+        <select id="category" name="category" required>
+            <option value="News">News</option>
+            <option value="Updates">Updates</option>
+            <option value="Events">Events</option>
+        </select>
         <button type="submit">Submit</button>
     </form>
     <script>
@@ -27,27 +33,69 @@ include 'config.php';
     </script>
 
     <h1>Press Releases</h1>
-    <?php
-    $sql = "SELECT title, content, link, image, created_at FROM press_releases ORDER BY created_at DESC";
-    $result = $conn->query($sql);
+    <input type="text" id="search" placeholder="Search press releases">
+    <select id="filter" onchange="filterPressReleases()">
+        <option value="">All Categories</option>
+        <option value="News">News</option>
+        <option value="Updates">Updates</option>
+        <option value="Events">Events</option>
+    </select>
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Content</th>
+                <th>Link</th>
+                <th>Image</th>
+                <th>Category</th>
+                <th>Posted On</th>
+            </tr>
+        </thead>
+        <tbody id="press-releases">
+            <?php
+            $sql = "SELECT title, content, link, image, category, created_at FROM press_releases ORDER BY created_at DESC";
+            $result = $conn->query($sql);
 
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            echo "<div class='press-release'>";
-            echo "<h2>" . $row["title"] . "</h2>";
-            echo "<p>" . $row["content"] . "</p>";
-            echo "<p><a href='" . $row["link"] . "'>" . $row["link"] . "</a></p>";
-            if ($row["image"]) {
-                echo "<p><img src='" . $row["image"] . "' alt='Image' style='max-width: 200px;'></p>";
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    echo "<tr>";
+                    echo "<td>" . $row["title"] . "</td>";
+                    echo "<td>" . $row["content"] . "</td>";
+                    echo "<td><a href='" . $row["link"] . "'>" . $row["link"] . "</a></td>";
+                    echo "<td>";
+                    if ($row["image"]) {
+                        echo "<img src='" . $row["image"] . "' alt='Image' style='max-width: 100px;'>";
+                    }
+                    echo "</td>";
+                    echo "<td>" . $row["category"] . "</td>";
+                    echo "<td>" . $row["created_at"] . "</td>";
+                    echo "</tr>";
+                }
+            } else {
+                echo "<tr><td colspan='6'>No press releases found.</td></tr>";
             }
-            echo "<p>Posted on: " . $row["created_at"] . "</p>";
-            echo "</div><hr>";
-        }
-    } else {
-        echo "No press releases found.";
-    }
 
-    $conn->close();
-    ?>
+            $conn->close();
+            ?>
+        </tbody>
+    </table>
+
+    <script>
+        function filterPressReleases() {
+            var search = document.getElementById('search').value.toLowerCase();
+            var filter = document.getElementById('filter').value;
+            var rows = document.getElementById('press-releases').getElementsByTagName('tr');
+            for (var i = 0; i < rows.length; i++) {
+                var title = rows[i].getElementsByTagName('td')[0].innerText.toLowerCase();
+                var category = rows[i].getElementsByTagName('td')[4].innerText;
+                if ((title.indexOf(search) > -1 || search === "") && (category === filter || filter === "")) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+        document.getElementById('search').addEventListener('keyup', filterPressReleases);
+    </script>
 </body>
 </html>

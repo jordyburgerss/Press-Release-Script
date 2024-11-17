@@ -5,6 +5,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title = $conn->real_escape_string($_POST["title"]);
     $content = $conn->real_escape_string($_POST["content"]);
     $link = $conn->real_escape_string($_POST["link"]);
+    $category = $conn->real_escape_string($_POST["category"]);
 
     $image = null;
     if ($_FILES["image"]["name"]) {
@@ -14,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $image = $target_file;
     }
 
-    $sql = "INSERT INTO press_releases (title, content, link, image) VALUES ('$title', '$content', '$link', '$image')";
+    $sql = "INSERT INTO press_releases (title, content, link, image, category) VALUES ('$title', '$content', '$link', '$image', '$category')";
     if ($conn->query($sql) === TRUE) {
         echo "New press release created successfully";
     } else {
